@@ -1,6 +1,7 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import itemRoutes from './routes/itemRoutes';
-import { errorHandler } from './middlewares/errorHandler';
+import userRoutes from './routes/user.route';
+import errorResponseHandler from './middlewares/errorHandler';
 
 const app = express(),
   bodyParser = require('body-parser'),
@@ -26,9 +27,18 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use(express.json());
 
 // Routes
-app.use('/api/items', itemRoutes);
-
+const baseUrl = '/api';
+app.use(`${baseUrl}/items`, itemRoutes);
+app.use(`${baseUrl}/users`, userRoutes);
 // Global error handler (should be after routes)
-app.use(errorHandler);
+
+app.use(errorResponseHandler);
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.status(404).json({
+    status: 'error',
+    message: `Resource not found at ${req.originalUrl}`,
+  });
+});
 
 export default app;
