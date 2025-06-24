@@ -1,7 +1,5 @@
-// src/schemas/userSchemas.ts
 import { z } from 'zod';
 
-// Define the Zod schema for creating a user
 export const createUserSchema = z.object({
     username: z.string()
         .trim()
@@ -17,10 +15,17 @@ export const createUserSchema = z.object({
         // .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, { message: 'Password must meet complexity requirements' }),
 });
 
-// Infer the TypeScript type from the Zod schema
 export type CreateUserDto = z.infer<typeof createUserSchema>;
 
-// You can define other schemas like update user, login, etc.
+export const loginUserSchema = z.object({
+    email: z.string()
+        .trim()
+        .email({ message: 'Invalid email format' }),
+    password: z.string()
+        .min(1, { message: 'Password is required' }),
+});
+export type LoginUserDto = z.infer<typeof loginUserSchema>;
+
 export const updateUserSchema = z.object({
     username: z.string().optional(),
     email: z.string().email().optional(),
