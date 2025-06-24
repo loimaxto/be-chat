@@ -1,4 +1,4 @@
-import {prisma } from '../../prisma/prisma'; // Adjust the import path as necessary
+import {prisma } from "../config/prisma.config"
 
 export class UserModel {
   async createUser(data: {

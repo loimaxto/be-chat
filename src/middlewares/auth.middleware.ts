@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyAuthToken } from '../utils/hashedPassword';
+import { verifyAuthToken } from '../config/auth.config';
 import { UnauthorizedError } from '../utils/errors';
 
 // By using declaration merging, we can add a 'user' property to Express's Request type.
@@ -10,6 +10,7 @@ declare global {
       user?: {
         sub: string;
         email: string;
+        username: string;
       };
     }
   }
@@ -17,13 +18,13 @@ declare global {
 
 export function authenticateToken(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (token == null) {
     return next(new UnauthorizedError('No token provided'));
   }
 
-  const payload = verifyAuthToken(token) as { sub: string, email: string } | null;
+  const payload = verifyAuthToken(token) as { sub: string, email: string , username: string} | null;
 
   if (!payload) return next(new UnauthorizedError('Invalid or expired token'));
 

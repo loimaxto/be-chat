@@ -5,7 +5,7 @@ import {
   generatePasswordHash,
   isPasswordMatching,
   generateAuthToken,
-} from '../utils/hashedPassword';
+} from '../config/auth.config';
 import { UnauthorizedError } from '../utils/errors';
 const userModel = new UserModel();
 
@@ -49,11 +49,13 @@ export async function loginUser(
     }
 
     const passwordMatches = await isPasswordMatching(password, user.password_hash);
+    
     if (!passwordMatches) {
       console.log("pass",user.password_hash, password)
+      throw new UnauthorizedError('Wrong password');
     }
 
-    const token = generateAuthToken(user.user_id, user.email);
+    const token = generateAuthToken(user.user_id, user.email, user.username);
 
     res.status(200).json({
       message: 'Login successful',

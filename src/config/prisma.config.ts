@@ -1,5 +1,3 @@
-// src/config/prisma.ts (or src/utils/prisma.ts)
-
 import { PrismaClient } from '@prisma/client';
 declare global {
   var prisma: PrismaClient | undefined;
