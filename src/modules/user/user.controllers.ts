@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import { CreateUserDto, LoginUserDto } from '../dtos/user.dto';
-import { UserModel } from '../models/user.model';
+import { CreateUserDto, LoginUserDto } from './user.dto';
+import { UserService } from './user.service';
 import {
   generatePasswordHash,
   isPasswordMatching,
   generateAuthToken,
-} from '../config/auth.config';
-import { UnauthorizedError } from '../utils/errors';
-const userModel = new UserModel();
+} from '../../config/auth.config';
+import { UnauthorizedError } from '../../utils/errors';
+const userService = new UserService();
 
 export async function createUser(
   req: Request<{}, {}, CreateUserDto>,
@@ -17,7 +17,7 @@ export async function createUser(
   try {
     const { username, email, password } = req.body;
     const password_hash = await generatePasswordHash(password);
-    const newUser = await userModel.createUser({
+    const newUser = await userService.createUser({
       username,
       email,
       password_hash,
@@ -30,7 +30,6 @@ export async function createUser(
       data: userWithoutPassword,
     });
   } catch (error) {
-    // Pass errors to the global error handler
     next(error);
   }
 }
@@ -43,7 +42,7 @@ export async function loginUser(
   try {
     const { email, password } = req.body;
 
-    const user = await userModel.findUserByEmail(email);
+    const user = await userService.findUserByEmail(email);
     if (!user) {
       throw new UnauthorizedError('No user found with this email');
     }

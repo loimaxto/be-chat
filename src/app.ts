@@ -1,6 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import itemRoutes from './routes/itemRoutes';
-import userRoutes from './routes/user.route';
+import userRoutes from './modules/user/user.route';
 import errorResponseHandler from './middlewares/errorHandler';
 
 const app = express(),
@@ -28,17 +27,10 @@ app.use(express.json());
 
 // Routes
 const baseUrl = '/api';
-app.use(`${baseUrl}/items`, itemRoutes);
 app.use(`${baseUrl}/users`, userRoutes);
-// Global error handler (should be after routes)
 
+// Global error handler7
 app.use(errorResponseHandler);
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.status(404).json({
-    status: 'error',
-    message: `Resource not found at ${req.originalUrl}`,
-  });
-});
 
 export default app;

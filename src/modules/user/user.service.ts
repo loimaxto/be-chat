@@ -1,11 +1,11 @@
-import {prisma } from "../config/prisma.config"
+import { prisma } from '../../config/prisma.config';
 
-export class UserModel {
+export class UserService {
   async createUser(data: {
     username: string;
     email: string;
     password_hash: string;
-    // profile_picture_url?: string; 
+    // profile_picture_url?: string;
   }) {
     try {
       const newUser = await prisma.users.create({
@@ -16,7 +16,7 @@ export class UserModel {
       if (e.code === 'P2002') {
         throw new Error('A user with this email or username already exists.');
       } else {
-        throw e; // Re-throw other errors
+        throw e;
       }
     }
   }
@@ -48,12 +48,15 @@ export class UserModel {
       throw e;
     }
   }
-  async updateUser(userId: string, data: Partial<{
-    username: string;
-    email: string;
-    password_hash: string;
-    // profile_picture_url?: string;
-  }>) {
+  async updateUser(
+    userId: string,
+    data: Partial<{
+      username: string;
+      email: string;
+      password_hash: string;
+      // profile_picture_url?: string;
+    }>,
+  ) {
     try {
       const updatedUser = await prisma.users.update({
         where: { user_id: userId },
@@ -83,12 +86,12 @@ export class UserModel {
   //     const conversations = await prisma.conversation_participants.findMany({
   //       where: { user_id:userId },
   //       include: {
-          
+
   //       },
   //     });
   //     return friends.map(friend => friend.friend);
   //   } catch (e: any) {
   //     throw e;
   //   }
-  // } 
+  // }
 }
