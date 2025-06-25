@@ -1,15 +1,17 @@
 import { prisma } from '../../config/prisma.config';
-
+import { CreateUserDto } from './user.dto';
+import { generatePasswordHash } from '../../config/auth.config';
 export class UserService {
-  async createUser(data: {
-    username: string;
-    email: string;
-    password_hash: string;
-    // profile_picture_url?: string;
-  }) {
+  async createUser(data: CreateUserDto) {
     try {
+      const password_hash = await generatePasswordHash(data.password);
+
       const newUser = await prisma.users.create({
-        data,
+        data: {
+          username: data.username,
+          email: data.email,
+          password_hash: password_hash,
+        },
       });
       return newUser;
     } catch (e: any) {
@@ -67,7 +69,7 @@ export class UserService {
       if (e.code === 'P2002') {
         throw new Error('A user with this email or username already exists.');
       } else {
-        throw e; // Re-throw other errors
+        throw e;
       }
     }
   }
