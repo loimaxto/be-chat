@@ -1,6 +1,6 @@
-import express from 'express';
-import itemRoutes from './routes/itemRoutes';
-import { errorHandler } from './middlewares/errorHandler';
+import express, { Request, Response, NextFunction } from 'express';
+import userRoutes from './modules/user/user.route';
+import errorResponseHandler from './middlewares/errorHandler';
 
 const app = express(),
   bodyParser = require('body-parser'),
@@ -26,9 +26,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use(express.json());
 
 // Routes
-app.use('/api/items', itemRoutes);
+const baseUrl = '/api';
+app.use(`${baseUrl}/users`, userRoutes);
 
-// Global error handler (should be after routes)
-app.use(errorHandler);
+// Global error handler7
+app.use(errorResponseHandler);
+
 
 export default app;

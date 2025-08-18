@@ -1,17 +1,30 @@
-import { Request, Response, NextFunction } from 'express';
+import { ApiError, ValidationError } from '../utils/errors';
 
-export interface AppError extends Error {
-  status?: number;
+function errorResponseHandler(err: Error, req: any, res: any, next: any) {
+  console.error(`[Global Error Handler] Error: ${err.name} - ${err.message}`);
+  if (process.env.NODE_ENV === 'development') {
+    console.error(err.stack);
+  }
+  // Default error response
+  let statusCode = 500;
+  let message = 'An unexpected error occurred.';
+  let errors: any[] | undefined;
+
+  if (err instanceof ApiError) {
+    statusCode = err.statusCode;
+    message = err.message;
+    if (err instanceof ValidationError) {
+      errors = err.errors; // Include specific validation errors
+    }
+  } else if (err instanceof Error) {
+    message = err.message;
+  }
+
+  res.status(statusCode).json({
+    status: 'error',
+    message,
+    ...(errors && { errors }), // Only include 'errors' array if it exists
+  });
 }
 
-export const errorHandler = (
-  err: AppError,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  console.error(err);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-  });
-};
+export default errorResponseHandler;
