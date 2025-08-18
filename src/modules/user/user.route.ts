@@ -1,15 +1,16 @@
-import {Router} from 'express'
-import { createUser, loginUser } from './user.controllers';
-import { validateZod } from '../../middlewares/zodValidation';
-import { createUserSchema, loginUserSchema } from './user.dto';
-import { authenticateToken } from '../../middlewares/auth.middleware';
+import { Router } from "express";
+import { UserController } from "./user.controllers";
+import { validateZod } from "../../middlewares/zodValidation";
+import { createUserSchema, loginUserSchema } from "./user.dto";
+import { authenticateToken } from "../../middlewares/auth.middleware";
 const router = Router();
 
-router.post('/register', validateZod(createUserSchema), createUser);
-router.post('/login', validateZod(loginUserSchema), loginUser);
+const userController = new UserController();
+router.post("/register", validateZod(createUserSchema), userController.createUser);
+router.post("/login", validateZod(loginUserSchema), userController.loginUser);
 
 router.use(authenticateToken);
-router.get("/all-user", (req, res) => {
-  res.json({ message: 'All users' });
-});
+router.post("/logout/:id", userController.logoutUser);
+router.get("/:id", userController.getUserById);
+router.get("/name/:username", userController.getUsersByUsername);
 export default router;
