@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts --ext 'ts'",
+    "debug": "nodemon --ext ts,js,json --watch src --exec \"node --inspect=9229 -r ts-node/register src/server.ts\"",
     "lint": "eslint 'src/**/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,7 +15,9 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^24.0.0",
     "eslint": "^9.28.0",
     "express": "^5.1.0",
@@ -22,16 +25,15 @@
     "nodemon": "^3.1.10",
     "npm": "^11.4.1",
     "prettier": "3.5.3",
+    "prettier-plugin-organize-imports": "^4.2.0",
     "ts-node": "^10.9.2",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.9",
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
     "@prisma/client": "^6.9.0",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "prisma": "^6.10.1",
     "swagger-jsdoc": "^6.2.8",
