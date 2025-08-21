@@ -19,7 +19,7 @@ export function generateAuthToken(userId: string, email: string, username: strin
     email,
   };
   console.log("acessb", ACCESS_TOKEN_SECRET)
-  return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '10d' });
+  return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '20d' });
 }
 
 export function verifyAuthToken(token: string) {
