@@ -9,20 +9,16 @@ const conversationController = new ConversationController();
 
 router.use(authenticateToken);
 
-router.post(
-  '/',
-  validateZod(createConversationSchema),
-  conversationController.createConversation,
-);
-router.get('/:id', conversationController.getConversationById);
-router.get('/user/:userId', conversationController.getUserConversations);
-router.post(
-  '/:conversationId/participants/:userId',
-  conversationController.addParticipantToConversation,
-);
-router.delete(
-  '/:conversationId/participants/:userId',
-  conversationController.removeParticipantFromConversation,
-);
+router.post('/', validateZod(createConversationSchema), conversationController.createConversation,);
+// router.get('/:id', conversationController.getConversationById);
+// router.get('/user/:userId', conversationController.getUserConversations);
+// router.post(
+//   '/:conversationId/participants/:userId',
+//   conversationController.addParticipantToConversation,
+// );
+// router.delete(
+//   '/:conversationId/participants/:userId',
+//   conversationController.removeParticipantFromConversation,
+// );
 
 export default router;
