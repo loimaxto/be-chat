@@ -1,16 +1,16 @@
-import { prisma } from "../../config/prisma.config";
 import { conversations } from "@prisma/client";
+import { prisma } from "../../config/prisma.config";
 import { BadRequestError } from "../../utils/errors";
-import { UserService } from "../user/user.service";
 import { CreateConversationDto } from "./conversation.dto";
+import { boolean } from "zod";
 
 interface ConversationServiceInterface {
   createConversation(creatorId: string, conversationData: CreateConversationDto): Promise<conversations>;
   addMemberToConversation(conversationId: string, userId: string, isAdmin: boolean): Promise<void>;
-  updateMemberRole(conversationId: string, userId: string, isAdmin: boolean): Promise<void>;
+  updateMemberRole(conversationId: string, userId: string, isAdmin: boolean): Promise<void>; 
+  getConversationDetails(conversationId: string, reqUserId: string, skip:number, take: number): Promise<any>;
 }
 export class ConversationService implements ConversationServiceInterface {
-
   async createConversation(creatorId: string, conversationData: CreateConversationDto): Promise<conversations> {
     const { name, isGroup, groupMemberIds } = conversationData;
     const allMemberIds = [...new Set([creatorId, ...groupMemberIds])];
@@ -25,12 +25,9 @@ export class ConversationService implements ConversationServiceInterface {
       throw new BadRequestError("One or more participant user IDs do not exist.");
     }
 
-    // Use a transaction to ensure creating the conversation and adding participants is an atomic operation.
     const newConversationWithParticipants = await prisma.$transaction(async (tx) => {
       const conversation = await tx.conversations.create({
         data: {
-          // The database constraint violation indicates an empty name is not allowed for non-group chats.
-          // We'll use the provided name for group chats, and null for 1-on-1 chats.
           name: isGroup ? name : null,
           isGroup: isGroup,
           created_by_user_id: creatorId,
@@ -48,8 +45,6 @@ export class ConversationService implements ConversationServiceInterface {
         data: participantsData,
       });
 
-      // Fetch the newly created conversation with its participants and their user details.
-      // This is more efficient than a separate query after the transaction.
       const fullConversation = await tx.conversations.findUniqueOrThrow({
         where: {
           conversation_id: conversation.conversation_id,
@@ -76,6 +71,80 @@ export class ConversationService implements ConversationServiceInterface {
     return newConversationWithParticipants;
   }
 
+  async getConversationDetails(conversationId: string, reqUserId: string, skip: number, take: number): Promise<any> {
+    const isPaticipant = await prisma.conversation_participants.count({
+      where:{
+        conversation_id: conversationId,
+        user_id: reqUserId
+      }
+    }) 
+    if ( !isPaticipant ) {
+      throw new BadRequestError("User is not a participant of this conversation")
+    }
+    const conversation = await prisma.messages.findMany({
+      where: {
+        conversation_id: conversationId,
+      },
+      skip: skip,
+      take: take,
+      orderBy: {
+        sent_at: "asc", // Get messages in ascending order (oldest first)
+      },
+      select: {
+        message_id: true,
+        content: true,
+        sender_id: true,
+        sent_at: true,
+      },
+    });
+    return conversation;
+  }
+  async getConversationsByUserId(userId: string): Promise<any> {
+    const conversations = await prisma.conversations.findMany({
+      where: {
+        conversation_participants: {
+          some: {
+            user_id: userId,
+          },
+        },
+      },
+      select: {
+        name: true,
+        isGroup: true,
+        conversation_participants: {
+          select: {
+            is_admin: true,
+            users: {
+              select: {
+                username: true,
+                profile_picture_url: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    const formattedConversations = conversations.map((conversation) => {
+      const { name, isGroup, conversation_participants } = conversation;
+
+      const formattedParticipants = conversation_participants.map((participant) => {
+        const { users, is_admin } = participant;
+        return {
+          name: users.username,
+          avatar: users.profile_picture_url,
+          isAdmin: is_admin,
+        };
+      });
+
+      return {
+        name,
+        isGroup,
+        members: formattedParticipants,
+      };
+    });
+
+    return { data: formattedConversations };
+  }
   async addMemberToConversation(conversationId: string, userId: string, isAdmin = false): Promise<void> {
     await prisma.conversation_participants.create({
       data: {

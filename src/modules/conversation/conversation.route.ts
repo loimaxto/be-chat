@@ -9,8 +9,8 @@ const conversationController = new ConversationController();
 
 router.use(authenticateToken);
 
-router.post('/', validateZod(createConversationSchema), conversationController.createConversation,);
-// router.get('/:id', conversationController.getConversationById);
+router.post('/', validateZod(createConversationSchema), conversationController.createConversation);
+router.get('/self', conversationController.getUserConversations.bind(conversationController));
 // router.get('/user/:userId', conversationController.getUserConversations);
 // router.post(
 //   '/:conversationId/participants/:userId',
