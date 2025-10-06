@@ -2,6 +2,7 @@ import express from "express";
 import errorResponseHandler from "./middlewares/errorHandler";
 import conversationRoutes from "./modules/conversation/conversation.route";
 import userRoutes from "./modules/user/user.route";
+import messageRoutes from "./modules/message/message.route";
 
 const app = express(),
   bodyParser = require("body-parser"),
@@ -29,6 +30,7 @@ app.use(express.json());
 const baseUrl = "/api";
 app.use(`${baseUrl}/users`, userRoutes);
 app.use(`${baseUrl}/conversations`, conversationRoutes);
+app.use(`${baseUrl}/messages`, messageRoutes);
 app.use(errorResponseHandler);
 
 export default app;
